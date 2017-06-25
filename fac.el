@@ -36,7 +36,7 @@
    for (name docstring . properties) in FACES
    do (custom-declare-face name `((t . ,properties)) docstring :group GROUP)))
 
-(defun fac-set-face-attributes (&rest FACES)
+(defun fac-set-attributes (&rest FACES)
   "From FACES of (face :attr-1 a1 :attr-2 a2 ...) lists, give each face its attributes. Create undefined faces."
   (cl-loop
    for (face . attributes) in FACES
@@ -44,7 +44,7 @@
    ;; (unless (facep face) (make-face face))
    (apply #'set-face-attribute face nil attributes)))
 
-(defun fac-shift-face-foreground (FUNCTION FACE REFERENCE)
+(defun fac-shift-foreground (FUNCTION FACE REFERENCE)
   "Set FACE's foreground to the result of applying FUNCTION to REFERENCE's foreground and background."
   (umr-let
    color-of ((KEY)
@@ -57,13 +57,13 @@
                                 (color-of :foreground)
                                 (color-of :background))))))
 
-(defun fac-fade-face-foreground (FACE REFERENCE)
+(defun fac-fade-foreground (FACE REFERENCE)
   "Make FACE's foreground a less intense version of REFERENCE's.
 REFERENCE is used to avoid fading FACE into oblivion with repreated applications."
-  (fac-shift-face-foreground #'fac--blend-colors FACE REFERENCE))
+  (fac-shift-foreground #'fac--blend-colors FACE REFERENCE))
 
-(defun fac-intensify-face-foreground (FACE REFERENCE)
-  (fac-shift-face-foreground #'fac--intensify-color FACE REFERENCE))
+(defun fac-intensify-foreground (FACE REFERENCE)
+  (fac-shift-foreground #'fac--intensify-color FACE REFERENCE))
 
 ;;; Adaptive faces
 
@@ -112,5 +112,17 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
 
 (hooker-make-hook :after load-theme
   fac-reset-adaptive-faces)
+
+
+(defun fac-box->lines (FACE)
+  "Turn a box into under- and over-lines."
+  (umr-let
+   color (pcase (face-attribute FACE :box)
+           (`nil nil)
+           (`t (face-attribute 'default :color))
+           ((and (pred stringp) c) c)
+           (plist (plist-get plist :color)))
+   (when color (set-face-attribute
+                FACE nil :box nil :underline color :overline color))))
 
 (provide 'fac)
