@@ -2,7 +2,7 @@
 (eval-when-compile
   (require 'umr))
 (mapc #'require
-      [hooker primary-pane miscellaneous])
+      [hook-up primary-pane miscellaneous])
 
 ;;; Colors (should be somewhere else, like `colors.el'...)
 
@@ -110,7 +110,7 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
 (defun fac-reset-adaptive-faces ()
   (run-hooks 'fac-adaptive-faces-setup))
 
-(hooker-make-hook :after load-theme
+(hook-up-make-hook :after load-theme
   fac-reset-adaptive-faces)
 
 
