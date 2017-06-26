@@ -98,7 +98,7 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
                       ',active-name
                     ',inactive-name)))
          (when face-setup
-           (add-hook 'adaptive-faces-setup
+           (add-hook 'fac-adaptive-faces-setup
                      `(lambda ()
                         (,face-setup ',active-name
                                      ',(face-attribute active-name :inherit))
@@ -110,8 +110,11 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
 (defun fac-reset-adaptive-faces ()
   (run-hooks 'fac-adaptive-faces-setup))
 
-(hook-up-make-hook :after load-theme
-  fac-reset-adaptive-faces)
+(unless (boundp 'after-load-theme-hook)
+  (hook-up-make-hook :after load-theme))
+
+(hook-up [after-load-theme-hook]
+         [fac-reset-adaptive-faces])
 
 
 (defun fac-box->lines (FACE)
