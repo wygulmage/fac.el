@@ -1,6 +1,6 @@
 ;;; fac.el --- face stuff -*- lexical-binding: t -*-
 (eval-when-compile
-  (require 'umr))
+  (mapc #'require [pcase umr]))
 (mapc #'require
       [hook-up primary-pane miscellaneous])
 
@@ -127,7 +127,7 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
     (umr-let
      color (pcase (face-attribute FACE :box)
              (`nil nil)
-             (`t (face-attribute 'default :color))
+             (`t (face-attribute FACE :foreground))
              ((and (pred stringp) c) c)
              (plist (plist-get plist :color)))
      (when color (set-face-attribute
