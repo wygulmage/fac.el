@@ -52,7 +52,7 @@
   (defun fac-set-faces-attributes (FACES &rest ATTRIBUTES)
     "Give all FACES ATTRIBUTES."
     (seq-doseq (face FACES)
-      (apply #'face-set-attribute nil ATTRIBUTES)))
+      (apply #'set-face-attribute face nil ATTRIBUTES)))
 
   (defun fac-shift-foreground (FUNCTION FACE REFERENCE)
     "Set FACE's foreground to the result of applying FUNCTION to REFERENCE's foreground and background."
