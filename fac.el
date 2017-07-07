@@ -1,6 +1,6 @@
 ;;; fac.el --- face stuff -*- lexical-binding: t -*-
 (eval-when-compile
-  (mapc #'require [pcase umr]))
+  (mapc #'require [cl-macs pcase umr]))
 (mapc #'require
       [hook-up primary-pane miscellaneous])
 
@@ -48,6 +48,11 @@
      do
      ;; (unless (facep face) (make-face face))
      (apply #'set-face-attribute face nil attributes)))
+
+  (defun fac-set-faces-attributes (FACES &rest ATTRIBUTES)
+    "Give all FACES ATTRIBUTES."
+    (seq-doseq (face FACES)
+      (apply #'face-set-attribute nil ATTRIBUTES)))
 
   (defun fac-shift-foreground (FUNCTION FACE REFERENCE)
     "Set FACE's foreground to the result of applying FUNCTION to REFERENCE's foreground and background."
