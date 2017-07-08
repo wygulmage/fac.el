@@ -87,9 +87,9 @@ REFERENCE is used to avoid fading FACE into oblivion with repreated applications
     "Create ersatz faces in customization group GROUP.
 Each ADAPTIVE-FACE take the form (NAME DOCSTRING ACTIVE-ATTRIBUTES INACTIVE-ATTRIBUTES &optional ACTIVE-SETUP INACTIVE-SETUP).
 
-Each face should be used by calling (GROUP-NAME-face).
+Each face should be used by calling (GROUP-NAME).
 
-The active or inactive version can be modified by setting the attributes of GROUP-NAME-active-face or GROUP-NAME-inactive-face.
+The active or inactive version can be modified by setting the attributes of GROUP-NAME-active-face or GROUP-NAME-inactive.
 
 FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the first argument relative to the second; the :inherit of the active faces will be used for the second."
     (declare (indent 1))
@@ -97,7 +97,7 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
      def-adaptive-face
      ((name doc active inactive &optional face-setup)
       (umr-let
-       face-symbol ((s) (misc--symb GROUP "-" name s "-face"))
+       face-symbol ((s) (misc--symb GROUP "-" name s))
        active-name (face-symbol "-active")
        inactive-name (face-symbol "-inactive")
        getter-name (face-symbol "")
