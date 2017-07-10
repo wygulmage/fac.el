@@ -1,8 +1,8 @@
 ;;; fac.el --- face stuff -*- lexical-binding: t -*-
 (eval-when-compile
-  (require 'umr))
+  (mapc #'require [cl-macs pcase umr]))
 (mapc #'require
-      [hook-up primary-pane miscellaneous])
+      [hook-up primary-pane miscellaneous seq])
 
 (cl-labels
 ;;; Private Functions:
@@ -49,11 +49,19 @@
      ;; (unless (facep face) (make-face face))
      (apply #'set-face-attribute face nil attributes)))
 
+  (defun fac-set-faces-attributes (FACES &rest ATTRIBUTES)
+    "Give all FACES ATTRIBUTES."
+    (seq-doseq (face FACES)
+      (apply #'set-face-attribute face nil ATTRIBUTES)))
+
   (defun fac-shift-foreground (FUNCTION FACE REFERENCE)
     "Set FACE's foreground to the result of applying FUNCTION to REFERENCE's foreground and background."
-    (umr-let
-     color-of ((KEY)
-               (color-name-to-rgb (face-attribute REFERENCE KEY nil 'default)))
+    (cl-labels
+        ((color-of (KEY)
+                   (color-name-to-rgb (face-attribute REFERENCE
+                                                      KEY
+                                                      nil
+                                                      'default))))
      (set-face-attribute
       FACE
       nil
@@ -124,10 +132,10 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
 
   (defun fac-box->lines (FACE)
     "Turn a box into under- and over-lines."
-    (umr-let
+   (umr-let
      color (pcase (face-attribute FACE :box)
              (`nil nil)
-             (`t (face-attribute 'default :color))
+             (`t (face-attribute FACE :foreground))
              ((and (pred stringp) c) c)
              (plist (plist-get plist :color)))
      (when color (set-face-attribute
