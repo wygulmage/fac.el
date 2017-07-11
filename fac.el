@@ -1,6 +1,6 @@
 ;;; fac.el --- face stuff -*- lexical-binding: t -*-
 (eval-when-compile
-  (mapc #'require [cl-macs pcase umr]))
+  (mapc #'require [cl-macs pcase let+]))
 (mapc #'require
       [hook-up primary-pane miscellaneous seq])
 
@@ -30,9 +30,9 @@
 
   (defun fac-select (&rest FONTS)
     "Return the first available font in FONTS, or the default font if none are available."
-    (umr-if (null FONTS) (face-attribute 'default :family)
-            (member (car FONTS) (fac-family-list)) (car FONTS)
-            (apply #'fac-select (cdr FONTS))))
+    (cond ((null FONTS) (face-attribute 'default :family))
+          ((member (car FONTS) (fac-family-list)) (car FONTS))
+          (t (apply #'fac-select (cdr FONTS)))))
 
   (defun fac-def-faces (GROUP &rest FACES)
     "Create FACES (name docstring properties) in GROUP. No fancy business here; the display is always t."
@@ -93,30 +93,29 @@ The active or inactive version can be modified by setting the attributes of GROU
 
 FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the first argument relative to the second; the :inherit of the active faces will be used for the second."
     (declare (indent 1))
-    (umr-let
-     def-adaptive-face
-     ((name doc active inactive &optional face-setup)
-      (umr-let
-       face-symbol ((s) (misc--symb GROUP "-" name s))
-       active-name (face-symbol "-active")
-       inactive-name (face-symbol "-inactive")
-       getter-name (face-symbol "")
-       (progn
-         (fac-def-faces GROUP
-           `(,active-name ,doc ,@active)
-           `(,inactive-name ,doc ,@inactive))
-         (fset getter-name
-               `(lambda ()
-                  (if (primary-pane-active?)
-                      ',active-name
-                    ',inactive-name)))
-         (when face-setup
-           (add-hook 'fac-adaptive-faces-setup
-                     `(lambda ()
-                        (,face-setup ',active-name
-                                     ',(face-attribute active-name :inherit))
-                        (,face-setup ',inactive-name
-                                     ',(face-attribute inactive-name :inherit))))))))
+    (let+
+     (def-adaptive-face
+      ((name doc active inactive &optional face-setup)
+       (let+
+         (face-symbol ((s) (misc--symb GROUP "-" name s))
+          active-name (face-symbol "-active")
+          inactive-name (face-symbol "-inactive")
+          getter-name (face-symbol ""))
+        (fac-def-faces GROUP
+          `(,active-name ,doc ,@active)
+          `(,inactive-name ,doc ,@inactive))
+        (fset getter-name
+              `(lambda ()
+                 (if (primary-pane-active?)
+                     ',active-name
+                   ',inactive-name)))
+        (when face-setup
+          (add-hook 'fac-adaptive-faces-setup
+                    `(lambda ()
+                       (,face-setup ',active-name
+                                    ',(face-attribute active-name :inherit))
+                       (,face-setup ',inactive-name
+                                    ',(face-attribute inactive-name :inherit))))))))
      (seq-doseq (f ADAPTIVE-FACES)
        (apply #'def-adaptive-face f))))
 
@@ -132,12 +131,11 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
 
   (defun fac-box->lines (FACE)
     "Turn a box into under- and over-lines."
-   (umr-let
-     color (pcase (face-attribute FACE :box)
-             (`nil nil)
-             (`t (face-attribute FACE :foreground))
-             ((and (pred stringp) c) c)
-             (plist (plist-get plist :color)))
+   (let+ (color (pcase (face-attribute FACE :box)
+                 (`nil nil)
+                 (`t (face-attribute FACE :foreground))
+                 ((and (pred stringp) c) c)
+                 (plist (plist-get plist :color))))
      (when color (set-face-attribute
                   FACE nil :box nil :underline color :overline color)))))
 
