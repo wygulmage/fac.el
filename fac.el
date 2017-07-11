@@ -56,12 +56,10 @@
 
   (defun fac-shift-foreground (FUNCTION FACE REFERENCE)
     "Set FACE's foreground to the result of applying FUNCTION to REFERENCE's foreground and background."
-    (cl-labels
-        ((color-of (KEY)
-                   (color-name-to-rgb (face-attribute REFERENCE
-                                                      KEY
-                                                      nil
-                                                      'default))))
+    (let+ (color-of
+           ((KEY)
+            (color-name-to-rgb
+             (face-attribute REFERENCE KEY nil 'default))))
      (set-face-attribute
       FACE
       nil
