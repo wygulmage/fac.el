@@ -7,7 +7,7 @@
 (cl-labels
 ;;; Private Functions:
 
-;;; Colors (should be somewhere else, like `colors.el'...)
+;;;; Colors (should be somewhere else, like `colors.el'...)
     ((blend-colors
       (C1 C2)
       "(R G B) -> (R G B) -> (R G B)
@@ -26,7 +26,7 @@
                 COLOR REFERENCE)))
 ;;; Public Functions:
 
-;;; Basic face stuff
+;;;; Basic face stuff
 
   (defun fac-select (&rest FONTS)
     "Return the first available font in FONTS, or the default font if none are available."
@@ -115,7 +115,8 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
                        (,face-setup ',inactive-name
                                     ',(face-attribute inactive-name :inherit))))))))
      (seq-doseq (f ADAPTIVE-FACES)
-       (apply #'def-adaptive-face f))))
+       (apply #'def-adaptive-face f)))
+    (run-hooks 'fac-adaptive-faces-setup))
 
   (defun fac-reset-adaptive-faces ()
     (run-hooks 'fac-adaptive-faces-setup))
