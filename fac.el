@@ -127,6 +127,14 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
   (hook-up [after-load-theme-hook]
            [fac-reset-adaptive-faces])
 
+  (defun fac-normalize-box (FACE)
+    "The :box property of FACE as a list."
+    (pcase (face-attribute FACE :box)
+      ('nil nil)
+      ('t `(:color ,(face-attribute FACE :foreground nil 'default)
+                   :line-width 1))
+      ((and (pred consp) x) x)
+      (x `(:color ,x :line-width 1))))
 
   (defun fac-box->lines (FACE)
     "Turn a box into under- and over-lines."
