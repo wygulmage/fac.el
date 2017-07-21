@@ -138,11 +138,7 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
 
   (defun fac-box->lines (FACE)
     "Turn a box into under- and over-lines."
-   (let+ (color (pcase (face-attribute FACE :box)
-                 (`nil nil)
-                 (`t (face-attribute FACE :foreground))
-                 ((and (pred stringp) c) c)
-                 (plist (plist-get plist :color))))
+   (let+ (color (plist-get (fac-normalize-box FACE) :color))
      (when color (set-face-attribute
                   FACE nil :box nil :underline color :overline color)))))
 
