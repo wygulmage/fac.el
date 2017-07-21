@@ -122,7 +122,7 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
     (run-hooks 'fac-adaptive-faces-setup))
 
   (unless (boundp 'after-load-theme-hook)
-    (hook-up-make-hook :after load-theme))
+    (hook-up-def-hook :after #'load-theme))
 
   (hook-up [after-load-theme-hook]
            [fac-reset-adaptive-faces])
