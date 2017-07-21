@@ -55,18 +55,21 @@
       (apply #'set-face-attribute face nil ATTRIBUTES)))
 
   (defun fac-shift-foreground (FUNCTION FACE REFERENCE)
-    "Set FACE's foreground to the result of applying FUNCTION to REFERENCE's foreground and background."
+    "Set FACE's foreground to the result of applying FUNCTION to REFERENCE's foreground and background. If neither REFERENCE nor the default face has defined colors, do nothing."
     (let+ (color-of
            ((KEY)
             (color-name-to-rgb
-             (face-attribute REFERENCE KEY nil 'default))))
-     (set-face-attribute
-      FACE
-      nil
-      :foreground (apply #'color-rgb-to-hex
-                         (funcall FUNCTION
-                                  (color-of :foreground)
-                                  (color-of :background))))))
+             (face-attribute REFERENCE KEY nil 'default)))
+           foreground (color-of :foreground)
+           background (color-of :background))
+      (when (and background foreground)
+        (set-face-attribute
+         FACE
+         nil
+         :foreground (apply #'color-rgb-to-hex
+                            (funcall FUNCTION
+                                     foreground
+                                     background))))))
 
   (defun fac-fade-foreground (FACE REFERENCE)
     "Make FACE's foreground a less intense version of REFERENCE's.
