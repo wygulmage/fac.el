@@ -4,26 +4,27 @@
 (mapc #'require
       [hook-up primary-pane miscellaneous seq])
 
-(cl-labels
+(let+ (
 ;;; Private Functions:
 
 ;;;; Colors (should be somewhere else, like `colors.el'...)
-    ((blend-colors
-      (C1 C2)
-      "(R G B) -> (R G B) -> (R G B)
-    Evenly blend C1 and C2, two emacs RGB triplets."
-      (declare (pure t) (side-effect-free t))
-      (seq-mapn (lambda (X Y) (* 0.5 (+ X Y)))
-                C1 C2))
+       blend-colors
+        ((C1 C2)
+         "(R G B) -> (R G B) -> (R G B)
+Evenly blend C1 and C2, two emacs RGB triplets."
+         (declare (pure t) (side-effect-free t))
+         (seq-mapn (lambda (X Y) (* 0.5 (+ X Y)))
+                   C1 C2))
 
-     (intensify-color
-      (COLOR REFERENCE)
-      "(R G B) -> (R G B) -> (R G B)
-    Shift COLOR away from REFERENCE."
-      (declare (pure t) (side-effect-free t))
-      (seq-mapn (lambda (C R)
-                  (* 0.5 (+ C (if (> C R) 1 0))))
-                COLOR REFERENCE)))
+       intensify-color
+        ((COLOR REFERENCE)
+         "(R G B) -> (R G B) -> (R G B)
+Shift COLOR away from REFERENCE."
+         (declare (pure t) (side-effect-free t))
+         (seq-mapn (lambda (C R)
+                     (* 0.5 (+ C (if (> C R) 1 0))))
+                   COLOR REFERENCE)))
+
 ;;; Public Functions:
 
 ;;;; Basic face stuff
@@ -97,6 +98,7 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
     (let+
      (def-adaptive-face
       ((name doc active inactive &optional face-setup)
+       "Create one adaptive face."
        (let+
          (face-symbol ((s) (misc--symb GROUP "-" name s))
           active-name (face-symbol "-active")
@@ -116,7 +118,9 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
                        (,face-setup ',active-name
                                     ',(face-attribute active-name :inherit))
                        (,face-setup ',inactive-name
-                                    ',(face-attribute inactive-name :inherit))))))))
+                                    ',(face-attribute inactive-name :inherit)))
+                    :append)))))
+     ;; Create up all the faces.
      (seq-doseq (f ADAPTIVE-FACES)
        (apply #'def-adaptive-face f)))
     (run-hooks 'fac-adaptive-faces-setup))
@@ -143,6 +147,6 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
     "Turn a box into under- and over-lines."
    (let+ (color (plist-get (fac-normalize-box FACE) :color))
      (when color (set-face-attribute
-                  FACE nil :box nil :underline color :overline color)))))
+                  FACE nil :box nil :underline color :overline color))))
 
-(provide 'fac)
+  (provide 'fac))
