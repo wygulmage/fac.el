@@ -2,12 +2,12 @@
 (eval-when-compile
   (mapc #'require [cl-macs pcase let+]))
 (mapc #'require
-      [hook-up primary-pane miscellaneous seq])
+      [color hook-up primary-pane miscellaneous seq])
 
 (let+ (
 ;;; Private Functions:
 
-;;;; Colors (should be somewhere else, like `colors.el'...)
+;;;; Colors (should be somewhere else, like `color.el'...)
        blend-colors
         ((C1 C2)
          "(R G B) -> (R G B) -> (R G B)
@@ -84,6 +84,11 @@ REFERENCE is used to avoid fading FACE into oblivion with repreated applications
 
   (defvar fac-adaptive-faces-setup ()
     "a list of adaptive face setup functions")
+  (defvar fac-adaptive-faces-table (make-hash-table)
+    "a table of adaptive face setup functions")
+  (defun fac-run-adaptive-faces-table ()
+    (maphash (lambda (_key procedure) (funcall procedure))
+             fac-adaptive-faces-table))
 
   (defun fac-def-adaptive-faces (GROUP &rest ADAPTIVE-FACES)
     "Create ersatz faces in customization group GROUP.
@@ -113,6 +118,14 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
                      ',active-name
                    ',inactive-name)))
         (when face-setup
+          (puthash getter-name
+           `(lambda ()
+              (,face-setup ',active-name
+                           ',(face-attribute active-name :inherit))
+              (,face-setup ',inactive-name
+                           ',(face-attribute inactive-name :inherit)))
+           fac-adaptive-faces-table)
+
           (add-hook 'fac-adaptive-faces-setup
                     `(lambda ()
                        (,face-setup ',active-name
@@ -123,16 +136,19 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
      ;; Create up all the faces.
      (seq-doseq (f ADAPTIVE-FACES)
        (apply #'def-adaptive-face f)))
-    (run-hooks 'fac-adaptive-faces-setup))
+    ;; (run-hooks 'fac-adaptive-faces-setup)
+    (fac-run-adaptive-faces-table))
 
-  (defun fac-reset-adaptive-faces ()
-    (run-hooks 'fac-adaptive-faces-setup))
+  ;; (defun fac-reset-adaptive-faces ()
+  ;;   (run-hooks 'fac-adaptive-faces-setup))
 
   (unless (boundp 'after-load-theme-hook)
     (hook-up-def-hook :after #'load-theme))
 
   (hook-up [after-load-theme-hook]
-           [fac-reset-adaptive-faces])
+           [
+            ;; fac-reset-adaptive-faces
+            fac-run-adaptive-faces-table])
 
   (defun fac-normalize-box (FACE)
     "The :box property of FACE as a list."
