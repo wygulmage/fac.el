@@ -2,7 +2,11 @@
 (eval-when-compile
   (mapc #'require [cl-macs pcase let+]))
 (mapc #'require
-      [color hook-up primary-pane miscellaneous seq])
+      [color ; `color-rgb-to-hex'
+       hook-up ; `hook-up', `hook-up-def-hook'
+       primary-pane ; `primary-pane-active?'
+       miscellaneous ; `misc--symb'
+       seq]) ; `seq-doseq', `seq-mapn'
 
 (let+ (
 ;;; Private Functions:
