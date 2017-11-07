@@ -82,33 +82,31 @@ REFERENCE is used to avoid fading FACE into oblivion with repreated applications
 
 ;;; Adaptive faces
 
-  (defvar fac-adaptive-faces-setup ()
-    "a list of adaptive face setup functions")
   (defvar fac-adaptive-faces-table (make-hash-table)
     "a table of adaptive face setup functions")
-  (defun fac-run-adaptive-faces-table ()
+  (defun fac-reset-adaptive-faces ()
+    "Rerun each adaptive face setup function."
     (maphash (lambda (_key procedure) (funcall procedure))
              fac-adaptive-faces-table))
 
   (defun fac-def-adaptive-faces (GROUP &rest ADAPTIVE-FACES)
     "Create ersatz faces in customization group GROUP.
-Each ADAPTIVE-FACE take the form (NAME DOCSTRING ACTIVE-ATTRIBUTES INACTIVE-ATTRIBUTES &optional ACTIVE-SETUP INACTIVE-SETUP).
+Each ADAPTIVE-FACE takes the form (NAME DOCSTRING ACTIVE-ATTRIBUTES INACTIVE-ATTRIBUTES &optional FACE-SETUP).
 
-Each face should be used by calling (GROUP-NAME).
+Use a face by calling (GROUP-NAME).
 
-The active or inactive version can be modified by setting the attributes of GROUP-NAME-active or GROUP-NAME-inactive.
+Modify the active or inactive face by setting the attributes of GROUP-NAME-active or GROUP-NAME-inactive.
 
-FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the first argument relative to the second; the :inherit of the active faces will be used for the second."
+FACE-SETUP should be a procedure of 2 arguments (faces) that sets attributes of the first relative to the second; the :inherit of the first face will be used as the second argument."
     (declare (indent 1))
     (let+
      (def-adaptive-face
       ((name doc active inactive &optional face-setup)
        "Create one adaptive face."
        (let+
-         (face-symbol ((s) (misc--symb GROUP "-" name s))
-          active-name (face-symbol "-active")
-          inactive-name (face-symbol "-inactive")
-          getter-name (face-symbol ""))
+           (getter-name (misc--symb GROUP "-" name)
+            active-name (misc--symb getter-name "-active")
+            inactive-name (misc--symb getter-name "-inactive"))
         (fac-def-faces GROUP
           `(,active-name ,doc ,@active)
           `(,inactive-name ,doc ,@inactive))
@@ -124,31 +122,17 @@ FACE-SETUP should a procedure of 2 arguments (faces) that sets attributes of the
                            ',(face-attribute active-name :inherit))
               (,face-setup ',inactive-name
                            ',(face-attribute inactive-name :inherit)))
-           fac-adaptive-faces-table)
-
-          (add-hook 'fac-adaptive-faces-setup
-                    `(lambda ()
-                       (,face-setup ',active-name
-                                    ',(face-attribute active-name :inherit))
-                       (,face-setup ',inactive-name
-                                    ',(face-attribute inactive-name :inherit)))
-                    :append)))))
-     ;; Create up all the faces.
+           fac-adaptive-faces-table)))))
+     ;; Create the faces.
      (seq-doseq (f ADAPTIVE-FACES)
        (apply #'def-adaptive-face f)))
-    ;; (run-hooks 'fac-adaptive-faces-setup)
-    (fac-run-adaptive-faces-table))
-
-  ;; (defun fac-reset-adaptive-faces ()
-  ;;   (run-hooks 'fac-adaptive-faces-setup))
+    (fac-reset-adaptive-faces))
 
   (unless (boundp 'after-load-theme-hook)
     (hook-up-def-hook :after #'load-theme))
 
   (hook-up [after-load-theme-hook]
-           [
-            ;; fac-reset-adaptive-faces
-            fac-run-adaptive-faces-table])
+           [fac-reset-adaptive-faces])
 
   (defun fac-normalize-box (FACE)
     "The :box property of FACE as a list."
