@@ -36,7 +36,7 @@ Shift COLOR away from REFERENCE."
           (t (apply #'fac-select (cdr FONTS)))))
 
   (defun fac-def-faces (GROUP &rest FACES)
-    "Create FACES (name docstring properties) in GROUP. No fancy business here; the display is always t."
+    "Create FACES (name docstring . properties) in GROUP. No fancy business here; the display is always t."
     (declare (indent 1))
     (cl-loop
      for (name docstring . properties) in FACES
@@ -82,12 +82,12 @@ REFERENCE is used to avoid fading FACE into oblivion with repreated applications
 
 ;;; Adaptive faces
 
-  (defvar fac-adaptive-faces-table (make-hash-table)
+  (defvar fac--adaptive-faces-table (make-hash-table)
     "a table of adaptive face setup functions")
   (defun fac-reset-adaptive-faces ()
     "Rerun each adaptive face setup function."
     (maphash (lambda (_key procedure) (funcall procedure))
-             fac-adaptive-faces-table))
+             fac--adaptive-faces-table))
 
   (defun fac-def-adaptive-faces (GROUP &rest ADAPTIVE-FACES)
     "Create ersatz faces in customization group GROUP.
@@ -122,7 +122,7 @@ FACE-SETUP should be a procedure of 2 arguments (faces) that sets attributes of 
                            ',(face-attribute active-name :inherit))
               (,face-setup ',inactive-name
                            ',(face-attribute inactive-name :inherit)))
-           fac-adaptive-faces-table)))))
+           fac--adaptive-faces-table)))))
      ;; Create the faces.
      (seq-doseq (f ADAPTIVE-FACES)
        (apply #'def-adaptive-face f)))
